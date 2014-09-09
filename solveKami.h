@@ -144,6 +144,12 @@ int color_mem_increse(char color);
 /* Decrese the number of blocks of color. */
 int color_mem_decrese(char color);
 
+/* For debug, print the color memory manager. */
+int show_color_mem();
+
+/* Print all the global varilables in some format to show the running clearly. */
+int show_all_global_vars();
+
 /* Run one round, step forward. This is the main calculation progress of this program, at least now. */
 int run_one_round();
 #endif

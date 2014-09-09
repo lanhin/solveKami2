@@ -14,7 +14,7 @@ int create_matrix(){
 /* full in the matrix with color */
 int init_matrix(){
   char color;
-  color = getchar();
+  color = getchar();// Get the '\n' and throw it.
   for(int i = 0; i < xlength*ylength; i++){
     //color = getchar();
     scanf("%c", &color);
@@ -156,17 +156,17 @@ int location_stack_pop(){
   return location_stack[top--];
 }
 
-/* Initialize all the data structure needed. */
+/* Initialize all the data structures needed. */
 int init(){
   create_matrix();
   create_location_stack();
-  tmp_bits = create_loc_bits();
+  tmp_bits = create_loc_bits();//used in calculate_a_block()
   clrall_bits(tmp_bits);
-  tmp_bits_total = create_loc_bits();
+  tmp_bits_total = create_loc_bits();//used in init_color_blocks()
   clrall_bits(tmp_bits_total);
   create_color_memory();
 
-  color_kinds = 0;
+  //color_kinds = 0;
   total_blocks = 0;
   total_colors = 0;
 
@@ -181,6 +181,7 @@ int destory_all(){
   destory_matrix();
   destory_location_stack();
   destory_loc_bits(tmp_bits);
+  destory_loc_bits(tmp_bits_total);
   destory_color_memory();
   return 0;
 }
@@ -270,6 +271,7 @@ int calculate_a_block(color_block * an_empty_block, int index){
   int node_index = index;
   clrall_bits(tmp_bits);
   an_empty_block -> color = matrix[index];
+  color_mem_increse(an_empty_block -> color);
   set_bits(an_empty_block -> location_bits, node_index);
   set_bits(tmp_bits, node_index);
   number_of_nodes_in_this_block ++;
@@ -282,30 +284,38 @@ int calculate_a_block(color_block * an_empty_block, int index){
   bottom_one_node = bottom_node(node_index);
   /* The folllowing four "if"s deal with the check. */
   if ( (left_one_node != -1) && (matrix[left_one_node] == an_empty_block -> color)){
+    #if 0
     if (DEBUG){
       printf("Left node identified");
     }
+    #endif
     location_stack_push(left_one_node);
     set_bits(tmp_bits, left_one_node);
   }
   if ( (right_one_node != -1) && (matrix[right_one_node] == an_empty_block -> color)){
+    #if 0
     if (DEBUG){
       printf("Right node identified");
     }
+    #endif
     location_stack_push(right_one_node);
     set_bits(tmp_bits, right_one_node);
   }
   if ( (top_one_node != -1) && (matrix[top_one_node] == an_empty_block -> color)){
+    #if 0
     if (DEBUG){
       printf("Top node identified");
     }
+    #endif
     location_stack_push(top_one_node);
     set_bits(tmp_bits, top_one_node);
   }
   if ( (bottom_one_node != -1) && (matrix[bottom_one_node] == an_empty_block -> color)){
+    #if 0
     if (DEBUG){
       printf("Bottom node identified");
     }
+    #endif
     location_stack_push(bottom_one_node);
     set_bits(tmp_bits, bottom_one_node);
   }
@@ -370,26 +380,85 @@ int get_weight(){
 
 /* Create color memory manager, the global varilable. Allocate space, set all the counters to 0. */
 int create_color_memory(){
+  color_memory_manager.all_the_colors = NULL;
+  color_memory_manager.all_the_colors = (char *)malloc(color_kinds * sizeof(char));
+  if (color_memory_manager.all_the_colors == NULL){
+    printf ("ERROR: cannot allocate space for color_memory_manager.all_the_colors!\n");
+    exit(1);
+  }
+
+  color_memory_manager.counters_of_colors = NULL;
+  color_memory_manager.counters_of_colors = (int *)malloc(color_kinds * sizeof(int));
+  if (color_memory_manager.counters_of_colors == NULL){
+    printf ("ERROR: cannot allocate space for color_memory_manager.counters_of_colors!\n");
+    exit(1);
+  }
+
+  getchar();// Get the '\n' and throw it.
+  char color;
+  for (int i = 0; i < color_kinds; i++){
+    color = getchar();
+    color_memory_manager.all_the_colors[i] = color;
+    color_memory_manager.counters_of_colors[i] = 0;
+
+    if(DEBUG){
+      printf ("%dth member in all_the_colors:%c\n", i, color_memory_manager.all_the_colors[i]);
+    }
+  }
+
   return 0;
 }
 
 /* Destory color memory manager. Free the allocated space. */
 int destory_color_memory(){
+  free(color_memory_manager.all_the_colors);
+  free(color_memory_manager.counters_of_colors);
+  if (DEBUG){
+    printf ("Color memory manager destoryed!\n");
+  }
   return 0;
 }
 
 /* Increse the number of blocks of color. */
 int color_mem_increse(char color){
+  for (int i = 0; i < color_kinds; i++){
+    if (color_memory_manager.all_the_colors[i] == color){
+      color_memory_manager.counters_of_colors[i] ++;
+    }
+  }
   return 0;
 }
 
 /* Decrese the number of blocks of color. */
 int color_mem_decrese(char color){
+  for (int i = 0; i < color_kinds; i++){
+    if (color_memory_manager.all_the_colors[i] == color){
+      if (color_memory_manager.counters_of_colors[i] <= 0){
+	printf ("ERROR: color_mem_decrese failed! The counter is 0!\n");
+	exit(1);
+      }
+      color_memory_manager.counters_of_colors[i] --;
+    }
+  }
+  return 0;
+}
+
+/* For debug, print the color memory manager. */
+int show_color_mem(){
+  for (int i = 0; i < color_kinds; i++){
+    printf ("Color %c: %d\n", color_memory_manager.all_the_colors[i], color_memory_manager.counters_of_colors[i]);
+  }
+  return 0;
+}
+
+/* Print all the global varilables in some format to show the running clearly. */
+int show_all_global_vars(){
   return 0;
 }
 
 /* Run one round, step forward. This is the main calculation progress of this program, at least now. */
 int run_one_round(){
+  return 0;
 }
 
 int main(int argc, char * argv[]){
@@ -397,10 +466,13 @@ int main(int argc, char * argv[]){
   scanf("%d", &xlength);
   printf ("ylength:\n");
   scanf("%d", &ylength);
+  printf ("kinds of color:\n");
+  scanf("%d", &color_kinds);
 
   if (DEBUG){
     printf ("xlength: %d\n", xlength);
     printf ("ylength: %d\n", ylength);
+    printf ("kinds of color: %d\n", color_kinds);
   }
 
   //create_matrix();
@@ -411,7 +483,8 @@ int main(int argc, char * argv[]){
   if (DEBUG){
     show_matrix();
   }
-
+  
+  #if 0
   if(DEBUG){
     location_stack_push(0);
     location_stack_push(10);
@@ -424,11 +497,18 @@ int main(int argc, char * argv[]){
       printf ("%d ", location_stack_pop());
     }
   }
+  #endif
 
   color_block * matrix_color_blocks = init_color_blocks();
-
+  
+  #if 0
   if (DEBUG){
     show_color_blocks(matrix_color_blocks);
+  }
+  #endif
+
+  if (DEBUG){
+    show_color_mem();
   }
   
   destory_all();
