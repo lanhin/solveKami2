@@ -31,13 +31,17 @@ int * location_stack;
 int top, base; //top and base of location stack
 int * tmp_bits;// bit vector used for calculation
 int * tmp_bits_total;// bit vector used to stand for all the checked nodes in the matrix
+int * tmp_bits_adjacency;// bit vector of one block's adjacent nodes
+color_block * matrix_color_blocks;
 
-color_memory color_memory_manager;
+color_memory * color_memory_manager;//global color memory
+color_memory * tmp_color_memory;//used in min_weight_of_one_block
 int total_blocks;// The number of blocks in total
 int total_colors;// The number of colors in total
 int blocks_weight;// The weight of blocks
 int colors_weight;// The weight of colors. It should be larger than blocks_weight
 int weight;// The weight of the present matrix
+int step_num;// The counter of steps.
 
 /* Create matrix, to store color values*/
 int create_matrix();
@@ -74,6 +78,9 @@ int show_bits(int * bits);
 
 /* Return the smallest zore's index in the location bit vector. */
 int smallest_zero_index(int * bits);
+
+/* Return the smallest one's index in the location bit vector. */
+int smallest_one_index(int * bits);
 
 /* Get the color of location [x,y] int the matrix */
 char color_of_matrix(int x, int y);
@@ -132,24 +139,55 @@ int show_color_blocks(color_block * blocks);
 /* Calculate the weight of the present matrix. */
 int get_weight();
 
+/* Calculate weight on the base of given vars. */
+int calculate_weight(int blocks_number, int color_number);
+
 /* Create color memory manager, the global varilable. Allocate space, set all the counters to 0. */
-int create_color_memory();
+color_memory *  create_color_memory(int flag);
 
 /* Destory color memory manager. Free the allocated space. */
-int destory_color_memory();
+int destory_color_memory(color_memory * color_memory_manager_local);
 
 /* Increse the number of blocks of color. */
-int color_mem_increse(char color);
+int color_mem_increse(color_memory * color_memory_manager_local, char color);
 
 /* Decrese the number of blocks of color. */
-int color_mem_decrese(char color);
+int color_mem_decrese(color_memory * color_memory_manager_local, char color);
+
+/* Copy color memory, from src to dest. */
+int copy_color_mem(color_memory * dest, color_memory * src);
+
+/* Return the counters of color int the color memory. */
+int has_this_color(color_memory * color_memory_manager, char color);
 
 /* For debug, print the color memory manager. */
-int show_color_mem();
+int show_color_mem(color_memory * color_memory_manager);
 
 /* Print all the global varilables in some format to show the running clearly. */
 int show_all_global_vars();
 
 /* Run one round, step forward. This is the main calculation progress of this program, at least now. */
 int run_one_round();
+
+/* Calculate the min weight coming from changing one block's color. Return the minimum weight, set the color changed to. */
+int min_weight_of_one_block(color_block * color_block_pointer, char * color_pointer);
+
+/* Do real change to the color blocks. Ready for the next round of running. */
+int do_real_change(color_block * best_block, char best_color);
+
+/* Calculate adjacent bit vector. */
+int set_adjacent_nodes(int * bits_adjacency, int * bits);
+
+/* Check if there are common "1"s in two bit vectors. */
+int has_common_bits(int * bits1, int * bits2);
+
+/* Delete block_to_delete from matrix_color_blocks, return the "next" of block_to_delete. */
+color_block * delete_from_color_blocks(color_block * block_to_delete);
+
+/* Destory one single block from matrix_color_blocks. Ignore the other ones and the next pointer. */
+int destory_single_block(color_block * block_to_delete);
+
+/* For debug. */
+int show_mem_tatalvars();
+
 #endif
