@@ -3,12 +3,11 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-#define TRUE 1
-#define FALSE 0
 #define BITSPERWORD 32 /* use int as vector element*/
 #define SHIFT 5
 #define MASK 0x1f /* the last 5 bits are 1 */
 #define DEBUG 1
+#define NOT_VALID_STEPS 9999
 
 /* To store color and locations of a block */
 typedef struct block{
@@ -27,12 +26,18 @@ typedef struct color_mem{
 int xlength, ylength;// The x and y size of the matrix.
 int color_kinds; // Different colors in the matrix.
 char * matrix;
+char * matrix_in_calc;
 int * location_stack;
 int top, base; //top and base of location stack
 int * tmp_bits;// bit vector used for calculation
 int * tmp_bits_total;// bit vector used to stand for all the checked nodes in the matrix
 int * tmp_bits_adjacency;// bit vector of one block's adjacent nodes
 color_block * matrix_color_blocks;
+int * calc_vector;// The calculation vector
+int * calc_vector_limit;// The limitation vector
+int * best_vector;// The vector to record the way to best_step or min_weight
+int steps_forward, best_steps_found;
+int last_vector_flag;
 
 color_memory * color_memory_manager;//global color memory
 color_memory * tmp_color_memory;//used in min_weight_of_one_block
@@ -41,19 +46,30 @@ int total_colors;// The number of colors in total
 int blocks_weight;// The weight of blocks
 int colors_weight;// The weight of colors. It should be larger than blocks_weight
 int weight;// The weight of the present matrix
+int min_weight;
 int step_num;// The counter of steps.
+int block_index, color_index;
 
 /* Create matrix, to store color values*/
-int create_matrix();
+char * create_matrix();
 
 /* full in the matrix with color */
 int init_matrix();
 
+/* Copy matrix from src to dest. */
+int copy_matrix(char * dest, char * src);
+
 /* Print the matrix. For debug. */
-int show_matrix();
+int show_matrix(char * matrix);
 
 /* Free the allocated space for matrix. To avoid memory leak. */
-int destory_matrix();
+int destory_matrix(char * matrix);
+
+/* Create calc_vector and set all the elements in it to 0. */
+int * create_calc_vector();
+
+/* Destory calc_vector. */
+int destory_calc_vector(int * calc_vector);
 
 /* Create location bit vector */
 int * create_loc_bits();
@@ -119,16 +135,16 @@ int bottom_node(int index);
 //color_block * new_color_block();
 
 /* Create color blocks for the matrix. */
-color_block * create_color_blocks();
+color_block * new_color_block();
 
 /* Destory color blocks for the calculation progress. */
 int destory_color_blocks(color_block * blocks);
 
-/* Initialize the color blocks, before all the calculation */
-color_block * init_color_blocks();
+/* Calculate the color blocks and color_memory_manager. Set total_blocks. */
+color_block * calculate_color_blocks(char * matrix);
 
 /* Calculate a block, set the location bits and color, then return the number of nodes in the block */
-int calculate_a_block(color_block * an_empty_block, int index);
+int calculate_a_block(char * matrix, color_block * an_empty_block, int index);
 
 /* dest |= src */
 int bits_or_and_equ(int * dest, int * src);
@@ -147,6 +163,9 @@ color_memory *  create_color_memory(int flag);
 
 /* Destory color memory manager. Free the allocated space. */
 int destory_color_memory(color_memory * color_memory_manager_local);
+
+/* Reset the counters in the color memory.  */
+int reset_color_mem(color_memory * color_memory_manager);
 
 /* Increse the number of blocks of color. */
 int color_mem_increse(color_memory * color_memory_manager_local, char color);
@@ -190,4 +209,28 @@ int destory_single_block(color_block * block_to_delete);
 /* For debug. */
 int show_mem_tatalvars();
 
+
+/* Set total_blocks and color_kinds in the limit vector. */
+int set_limit_vector(int step_num);
+
+/* Change the matrix's nodes' color. */
+int do_change_to_matrix(char * matrix, int block_index, int color_index);
+
+/* Calculate the total colors, according to color_memory_manager. */
+int get_total_colors();
+
+/* Copy vector from src to dest. Their length are both 2*steps_forward. */
+int copy_vector(int * dest, int * src);
+
+/* Print change info. */
+int footprint(int block_index, int color_index);
+
+/* Check the last_vector_flag. If it's 1, set it to 0 and return 1. 0 would be returned in other cases. */
+int this_is_the_last_vector();
+
+/* Set the calc_vector to the next value. When overflow happens, the calc_vector would be set to all 0s and last_vector_flag would be set to 1. */
+int increse_vector(int index);
+
+/* For debug. */
+int show_calc_vector(int * vector);
 #endif
