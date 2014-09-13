@@ -827,7 +827,7 @@ int footprint(int block_index, int color_index){
     }
   }
 
-  printf ("Step %d: %d, %d  color: %c\n", step_num, matrix_index % xlength, matrix_index / xlength, color_to_change);
+  printf ("Step %d: %d, %d  color: %c\n", steps_forward * forward_round + step_num, matrix_index % xlength, matrix_index / xlength, color_to_change);
   return 0;
 }
 
@@ -911,6 +911,7 @@ int main(int argc, char * argv[]){
     printf ("xlength: %d\n", xlength);
     printf ("ylength: %d\n", ylength);
     printf ("kinds of color: %d\n", color_kinds);
+    printf ("step forward: %d\n", steps_forward);
   }
 
   //  steps_forward = 2;
@@ -930,8 +931,8 @@ int main(int argc, char * argv[]){
   best_steps_found = NOT_VALID_STEPS;
   int success_flag = 0;
   int ahead_steps = steps_forward;
-  int Increse = 0;//for debug
-  //while(!success_flag){
+  forward_round = 0;
+  while(!success_flag){
   do{
       
       for (step_num = 0; step_num < steps_forward; step_num++){
@@ -1000,7 +1001,8 @@ int main(int argc, char * argv[]){
       do_change_to_matrix(matrix, block_index, color_index);
       footprint(block_index, color_index);
     }
-    //}
+    forward_round ++;
+  }
   #endif
   
 #if 0

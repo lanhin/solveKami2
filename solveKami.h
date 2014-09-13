@@ -36,7 +36,7 @@ color_block * matrix_color_blocks;
 int * calc_vector;// The calculation vector
 int * calc_vector_limit;// The limitation vector
 int * best_vector;// The vector to record the way to best_step or min_weight
-int steps_forward, best_steps_found;
+int steps_forward, best_steps_found, forward_round;
 int last_vector_flag;
 
 color_memory * color_memory_manager;//global color memory
