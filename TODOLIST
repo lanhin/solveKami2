@@ -1,0 +1,7 @@
+1. Print the output into an output file, in a format easy to read.
+
+2. Make the program run faster and quantify the amount of faster.
+
+3. Bug0914: steps_forward = 1 gets better result than steps_forward = 2 for solveKami.in .
+
+4. Parallelize the program with OpenMP.
