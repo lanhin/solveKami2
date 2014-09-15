@@ -1,3 +1,11 @@
+/* Author: Lin Han
+ * 
+ * lanhin1@gmail.com
+ *
+ * CS09@USTC
+ *
+ */
+
 #include"solveKami.h"
 
 /* Create matrix, to store color values*/

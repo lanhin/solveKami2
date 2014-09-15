@@ -1,3 +1,11 @@
+/* Author: Lin Han
+ * 
+ * lanhin1@gmail.com
+ *
+ * CS09@USTC
+ *
+ */
+
 #ifndef SOLVEKAMI_H
 #define SOLVEKAMI_H
 #include<stdio.h>
