@@ -36,6 +36,7 @@ int copy_matrix(char * dest, char * src){
   for (int i = 0; i <= (xlength * ylength); i++){
     dest[i] = src[i];
   }
+  return 0;
 }
 
 /* Print the matrix. For debug. */
@@ -54,6 +55,7 @@ int show_matrix(char * matrix){
   for (int i = 0; i < xlength*ylength; ++i){
     putchar(matrix[i]);
   }*/
+  return 0;
 }
 
 /* Free the allocated space for matrix. To avoid memory leak. */
@@ -210,6 +212,12 @@ int location_stack_pop(){
 
 /* Initialize all the data structures needed. */
 int init(){
+  outputfile = fopen (outputfilename, "w");
+  if (outputfile == NULL){
+    printf ("ERROR: cannot open output file!\n");
+    exit(1);
+  }
+  
   matrix = create_matrix();
   matrix_in_calc = create_matrix();
   
@@ -262,6 +270,8 @@ int destory_all(){
   destory_color_memory(color_memory_manager);
   //destory_color_memory(tmp_color_memory);
   destory_color_blocks(matrix_color_blocks);
+  fclose(outputfile);
+  
   return 0;
 }
 
@@ -528,6 +538,7 @@ int reset_color_mem(color_memory * color_memory_manager){
   for (int i=0; i < color_kinds; i++){
     color_memory_manager -> counters_of_colors[i] = 0;
   }
+  return 0;
 }
 
 /* Increse the number of blocks of color. */
@@ -706,7 +717,8 @@ int do_real_change(color_block * best_block, char best_color){
     
     to_check_pointer = to_check_pointer -> next;
   }
-
+  
+  return 0;
 }
 
 /* Delete block_to_delete from matrix_color_blocks, return the "next" of block_to_delete. */
@@ -736,6 +748,8 @@ int destory_single_block(color_block * block_to_delete){
 
   destory_loc_bits(block_to_delete -> location_bits);
   free (block_to_delete);
+
+  return 0;
 }
 
 /* Calculate adjacent bit vector. */
@@ -793,6 +807,8 @@ int show_mem_tatalvars(){
     printf ("total blocks: %d\n", total_blocks);
     printf ("total colors: %d\n", total_colors);
   }
+
+  return 0;
 }
 
 /* Set total_blocks and color_kinds in the limit vector. */
@@ -836,6 +852,9 @@ int footprint(int block_index, int color_index){
   }
 
   printf ("Step %d: %d, %d  color: %c\n", steps_forward * forward_round + step_num, matrix_index % xlength, matrix_index / xlength, color_to_change);
+
+  fprintf (outputfile, "Step %d: %d, %d  color: %c\n", steps_forward * forward_round + step_num, matrix_index % xlength, matrix_index / xlength, color_to_change);
+
   return 0;
 }
 
@@ -880,7 +899,7 @@ int increse_vector(int index){
   }
 
   if (DEBUG && !index){
-    printf ("a little part more...\n");
+    printf ("%d of %d completed of this round...\n", calc_vector[0]+1, calc_vector_limit[0]);
   }
   //index >= 0
   if ((calc_vector[index] + 1) == calc_vector_limit[index]){
@@ -899,9 +918,25 @@ int show_calc_vector(int * vector){
     printf ("%d ", vector[i]);
   }
   putchar('\n');
+
+  return 0;
+}
+
+/* Write global vars to output file. */
+int write_vars_to_file(){
+  fprintf(outputfile, "xlength:\t%d\n", xlength);
+  fprintf(outputfile, "ylength:\t%d\n", ylength);
+  fprintf(outputfile, "kinds of color:\t%d\n", color_kinds);
+  fprintf(outputfile, "steps forward:\t%d\n", steps_forward);
+  fprintf(outputfile, "color weight:\t%d\n", colors_weight);
+  fprintf(outputfile, "block weight:\t%d\n", blocks_weight);
+  fprintf(outputfile, "\n====Solution founded:\n");
+  return 0;
 }
 
 int main(int argc, char * argv[]){
+  printf ("out put file name:\n");
+  scanf("%s", outputfilename);
   printf ("xlength:\n");
   scanf("%d", &xlength);
   printf ("ylength:\n");
@@ -920,6 +955,9 @@ int main(int argc, char * argv[]){
     printf ("ylength: %d\n", ylength);
     printf ("kinds of color: %d\n", color_kinds);
     printf ("step forward: %d\n", steps_forward);
+    printf ("color weight: %d\n", colors_weight);
+    printf ("blocks weight: %d\n", blocks_weight);
+    printf ("filename: %s\n", outputfilename);
   }
 
   //  steps_forward = 2;
@@ -927,6 +965,8 @@ int main(int argc, char * argv[]){
   
   init_matrix();
 
+  write_vars_to_file();
+  
   #if 0
   if (DEBUG){
     show_matrix();
@@ -940,7 +980,11 @@ int main(int argc, char * argv[]){
   int success_flag = 0;
   int ahead_steps = steps_forward;
   forward_round = 0;
+  #if 1
   while(!success_flag){
+    if (DEBUG){
+      printf ("Round %d...\n", forward_round+1);
+    }
   do{
       
       for (step_num = 0; step_num < steps_forward; step_num++){
@@ -992,7 +1036,7 @@ int main(int argc, char * argv[]){
     printf ("best_steps_found: %d\n", best_steps_found);
     printf ("min_weight: %d\n", min_weight);
   }
-    #if 1
+  
     //then this is the last vector. all the strps_forward steps has finished
     if (best_steps_found != NOT_VALID_STEPS){//a good solution found
       success_flag = 1;
@@ -1040,7 +1084,11 @@ int main(int argc, char * argv[]){
   
   destory_all();
 
-  printf ("******Successed!******\n");
+  if (success_flag){
+    printf ("******Successed!******\n");
+  }else{
+    printf ("******Failed!******\n");
+  }
   
   return 0;
 }

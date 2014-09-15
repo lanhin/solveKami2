@@ -57,6 +57,8 @@ int weight;// The weight of the present matrix
 int min_weight;
 int step_num;// The counter of steps.
 int block_index, color_index;
+char outputfilename[64];//output file name
+FILE * outputfile;//output file pointer
 
 /* Create matrix, to store color values*/
 char * create_matrix();
@@ -241,4 +243,7 @@ int increse_vector(int index);
 
 /* For debug. */
 int show_calc_vector(int * vector);
+
+/* Write global vars to output file. */
+int write_vars_to_file();
 #endif
