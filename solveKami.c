@@ -1037,7 +1037,7 @@ int main(int argc, char * argv[]){
       printf ("min_weight: %d\n", min_weight);
     }
   
-    //then this is the last vector. all the strps_forward steps has finished
+    //then this is the last vector. all the steps_forward steps has finished
     if (best_steps_found != NOT_VALID_STEPS){//a good solution found
       success_flag = 1;
       ahead_steps = best_steps_found+1;
